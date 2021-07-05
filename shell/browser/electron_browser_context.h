@@ -8,6 +8,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "base/memory/weak_ptr.h"
 #include "chrome/browser/predictors/preconnect_manager.h"
@@ -36,6 +37,9 @@ class ElectronExtensionSystem;
 #endif
 
 namespace electron {
+
+// Preference keys for device apis
+extern const char kHidGrantedDevicesPref[];
 
 class ElectronBrowserContext;
 class ElectronDownloadManagerDelegate;
@@ -138,6 +142,19 @@ class ElectronBrowserContext : public content::BrowserContext {
   void SetSSLConfig(network::mojom::SSLConfigPtr config);
   network::mojom::SSLConfigPtr GetSSLConfig();
   void SetSSLConfigClient(mojo::Remote<network::mojom::SSLConfigClient> client);
+
+  // Grants |origin| access to |object| by writing it into the browser context.
+  // To be used in place of ObjectPermissionContextBase::GrantObjectPermission.
+  void GrantObjectPermission(const url::Origin& origin,
+                             base::Value object,
+                             const std::string& pref_key);
+
+  // Returns the list of objects that |origin| has been granted permission to
+  // access. To be used in place of
+  // ObjectPermissionContextBase::GetGrantedObjects.
+  std::vector<std::unique_ptr<base::Value>> GetGrantedObjects(
+      const url::Origin& origin,
+      const std::string& pref_key);
 
   ~ElectronBrowserContext() override;
 
